@@ -13,6 +13,8 @@ It will:
     - confirm that a partial download will work.
 - rename all enclosures in the rss to an ipfs url.
 - set up an `ipns` entry for the archive folder.
+- The final rss file you publish will be named `*.final.xml`  You'll see it in
+  your ipns folder.
 
 
 This requires you're running an instance `ipfs daemon` on your box.
