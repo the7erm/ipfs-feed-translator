@@ -21,7 +21,6 @@ This requires you're running an instance `ipfs daemon` on your box.
 
 ## List of all the rss url's you'd like to process
 RSS_URLS: [
-    "http://xml.nfowars.net/Alex.rss",
     "http://music.the-erm.com/feed",
 ]
 
@@ -44,7 +43,6 @@ BLACK_LIST: [
 
 ## Fallback to your own ipfs gateway as a last resort.
 FALLBACK_LOCAL_GATEWAYS: [
-    "http://do.the-erm.com:8080/ipfs/:hash",
 ]
 
 ## Always try to use this list of gateways first.
