@@ -7,7 +7,7 @@ import sys
 import _thread
 import shutil
 
-from config import TIME_TO_LIVE, STORAGE_DIR
+from config import TIME_TO_LIVE, STORAGE_DIR, LOG_LEVEL
 from logger import log
 from constants import HTTP_OK, HTTP_PARTIAL
 
@@ -143,13 +143,20 @@ def download(url, refresh=True,
                     fp.write(data)
                     done_int = int(50 * dl / total_length)
                     done_float = float(100 * dl / total_length)
-                    sys.stdout.write("\rDownload progress: %s [%s%s] %0.1f%%" % (
-                        basename,
-                        '=' * done_int,
-                        ' ' * (50-done_int),
-                        done_float
-                    ) )
-                    sys.stdout.flush()
+                    ### CRITICAL    50
+                    ### ERROR   40
+                    ### WARNING 30
+                    ### INFO    20
+                    ### DEBUG   10
+                    ### NOTSET  0
+                    if LOG_LEVEL <= log.INFO:
+                        sys.stdout.write("\rDownload progress: %s [%s%s] %0.1f%%" % (
+                            basename,
+                            '=' * done_int,
+                            ' ' * (50-done_int),
+                            done_float
+                        ) )
+                        sys.stdout.flush()
                     if response.status_code not in (HTTP_OK, HTTP_PARTIAL):
                         break
         if response.status_code not in (HTTP_OK, HTTP_PARTIAL):
@@ -162,8 +169,9 @@ def download(url, refresh=True,
             log.error(msg)
             return ""
 
-        sys.stdout.write("\n")
-        sys.stdout.flush()
+        if LOG_LEVEL <= log.INFO:
+            sys.stdout.write("\n")
+            sys.stdout.flush()
 
         tmp_exists = os.path.exists(tmp_cache_file)
         tmp_size = os.path.getsize(tmp_cache_file)

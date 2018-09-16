@@ -19,7 +19,8 @@ from downloader import download, safe_filename, construct_cache_file_name, \
 from publisher import publish, get_public_gateways, publish_folder
 from random import shuffle
 from config import MAX_ERRORS, TEST_DOWNLOAD_TIMEOUT, FIRST_CHOICE_GATEWAYS, \
-                   FALLBACK_LOCAL_GATEWAYS, STORAGE_DIR, TIME_TO_LIVE
+                   FALLBACK_LOCAL_GATEWAYS, STORAGE_DIR, TIME_TO_LIVE, \
+                   LOG_LEVEL
 from constants import HTTP_OK, HTTP_PARTIAL
 
 public_gateways = get_public_gateways()
@@ -313,29 +314,28 @@ class RssFeed:
                 for data in response.iter_content(chunk_size=1024 * 1):
                     dl += len(data)
                     done_float = float(100 * dl / TEST_RANGE)
-                    """
-                    sys.stdout.write("\rTEST %s [%s%s] %0.1f%%" % (
-                        url,
-                        '=' * done_int,
-                        ' ' * (25-done_int),
-                        done_float
-                    ) )
-                    """
-                    sys.stdout.write("\rTEST %s %0.2f%% dl:%s" % (
-                        url,
-                        done_float,
-                        dl
-                    ) )
-                    sys.stdout.flush()
+                    ### CRITICAL    50
+                    ### ERROR   40
+                    ### WARNING 30
+                    ### INFO    20
+                    ### DEBUG   10
+                    ### NOTSET  0
+                    if LOG_LEVEL <= log.INFO:
+                        sys.stdout.write("\rTEST %s %0.2f%% dl:%s" % (
+                            url,
+                            done_float,
+                            dl
+                        ) )
+                        sys.stdout.flush()
                     if response.status_code not in (HTTP_OK, HTTP_PARTIAL):
-                        log.debug("BAD URL:%s STATUS:%s" % (url, response.status_code))
+                        log.error("BAD URL:%s STATUS:%s" % (url, response.status_code))
                         response.close()
                         return result
                     if dl >= TEST_RANGE:
                         result = True
                         if dl > total_length:
                             result = False
-                            log.debug("BAD URL:%s %% too much" % url)
+                            log.error("BAD URL:%s %% too much" % url)
                             response.close()
                             break
                         else:
@@ -346,7 +346,7 @@ class RssFeed:
                         break
 
             except requests.exceptions.ConnectionError as e:
-                log.debug("BAD URL:%s" % url)
+                log.error("BAD URL:%s" % url)
                 log.error("Error reading %s" % url)
                 log.error("error.__doc__ %s" % e.__doc__)
                 if hasattr(e, 'message'):
@@ -354,7 +354,7 @@ class RssFeed:
                 response.close()
                 return result
             except requests.exceptions.ConnectionError as e:
-                log.debug("BAD URL:%s" % url)
+                log.error("BAD URL:%s" % url)
                 log.error("Error reading %s" % url)
                 log.error("error.__doc__ %s" % e.__doc__)
                 if hasattr(e, 'message'):
@@ -362,8 +362,9 @@ class RssFeed:
                 response.close()
                 return result
 
-        sys.stdout.write("\n")
-        sys.stdout.flush()
+        if LOG_LEVEL <= log.INFO:
+            sys.stdout.write("\n")
+            sys.stdout.flush()
 
         return result
 
