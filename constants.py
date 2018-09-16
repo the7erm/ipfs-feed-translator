@@ -1,0 +1,4 @@
+
+HTTP_OK = 200
+HTTP_PARTIAL = 206
+
