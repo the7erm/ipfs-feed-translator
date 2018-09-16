@@ -13,6 +13,7 @@ while True:
     ipns_urls = []
     cache_file_downloaded = False
     for url in config.RSS_URLS:
+        log.debug("Creating feed object for:%s" % url)
         feed = RssFeed(url)
         feed.process()
         if feed.ipns_hash and feed.cache_file_downloaded:

@@ -112,20 +112,26 @@ class RssFeed:
         log.info("parsing:%s" % self.cache_file)
         self.feed = feedparser.parse(self.cache_file)
         log.debug("feed:%s" % pformat(self.feed))
-        if not self.cache_file_downloaded:
-            ttl = TIME_TO_LIVE
-            if 'ttl' in self.feed.feed:
-                log.debug("feed.ttl:%s" % self.feed.feed['ttl'])
-                try:
-                    ttl_min = int(self.feed.feed['ttl'])
-                    ttl = ttl_min * 60
-                except:
-                    pass
-                if is_cache_stale(self.cache_file, TTL=ttl, refresh=True):
-                    self.cache_file = download(self.rss_url,
-                                               subdir="%s.orig" % self.key,
-                                               TTL=ttl)
-                    self.cache_file_downloaded = True
+        if self.cache_file_downloaded:
+            log.debug("cache file already downloaded")
+            return
+        ttl = TIME_TO_LIVE
+        log.debug("checking ttl:%s" % self.rss_url)
+        if 'ttl' in self.feed.feed:
+            log.debug("feed.ttl:%s" % self.feed.feed['ttl'])
+            try:
+                ttl_min = int(self.feed.feed['ttl'])
+                ttl = ttl_min * 60
+            except:
+                pass
+        if is_cache_stale(self.cache_file, TTL=ttl, refresh=True):
+            log.debug("cache is stale:%s" % self.rss_url)
+            self.cache_file = download(self.rss_url,
+                                       subdir="%s.orig" % self.key,
+                                       TTL=ttl)
+            self.cache_file_downloaded = True
+        else:
+            log.debug("cache is not stale:%s" % self.rss_url)
 
     def process_image(self):
         try:
