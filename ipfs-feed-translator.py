@@ -3,6 +3,7 @@
 import config
 import sys
 import time
+import rss_feed
 
 from rss_feed import RssFeed, public_gateways
 from logger import log
@@ -10,6 +11,8 @@ from logger import log
 log.debug("import complete")
 
 while True:
+    rss_feed.error_tracker = {}
+    rss_feed.reliablity_tracker = {}
     ipns_urls = []
     cache_file_downloaded = False
     for url in config.RSS_URLS:

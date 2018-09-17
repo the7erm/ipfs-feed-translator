@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4] - 2018-09-16
+### Fixed
+- Reset the error tracker & reliability tracker at the beginning of every
+  loop.
+
 ## [0.3] - 2018-09-16
 ### Fixed
 - Logic for determining if a file is stale
