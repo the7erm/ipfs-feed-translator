@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.5] - 2018-09-17
+### Changed
+- Final rss feed won't display unless the level is INFO or below.
+
 ## [0.4] - 2018-09-16
 ### Fixed
 - Reset the error tracker & reliability tracker at the beginning of every

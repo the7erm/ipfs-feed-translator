@@ -345,8 +345,9 @@ class RssFeed:
                             response.close()
                             break
                         else:
-                            sys.stdout.write("\n")
-                            sys.stdout.flush()
+                            if LOG_LEVEL <= log.INFO:
+                                sys.stdout.write("\n")
+                                sys.stdout.flush()
                             log.debug("GOOD URL:%s" % url)
                             response.close()
                         break
@@ -423,8 +424,9 @@ class RssFeed:
     def write_final_file(self):
         with open(self.final_file,'w') as fp:
             fp.write(self.text)
-            print("== final file ==")
-            print(self.text)
+            if LOG_LEVEL <= log.INFO:
+                print("== final file ==")
+                print(self.text)
 
         log.debug("error_tracker:%s" % pformat(error_tracker))
         log.debug("reliablity_tracker:%s" % pformat(reliablity_tracker))
