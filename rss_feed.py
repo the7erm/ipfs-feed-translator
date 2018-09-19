@@ -73,8 +73,7 @@ class RssFeed:
             self.rss_url, subdir="%s.orig" % self.key)
 
         self.text = ''
-        if os.path.exists(self.cache_file):
-            self.text = open(self.cache_file, 'r').read()
+        self.load_text()
 
         self.feed = None
         self.parent_hash = ""
@@ -104,10 +103,12 @@ class RssFeed:
             self.publish_ipns()
 
     def process_feed(self):
+
         self.cache_file_downloaded = False
-        if not  os.path.exists(self.cache_file):
+        if not os.path.exists(self.cache_file):
             self.cache_file = download(self.rss_url, subdir="%s.orig" % self.key)
             self.cache_file_downloaded = True
+            self.load_text()
 
         log.info("parsing:%s" % self.cache_file)
         self.feed = feedparser.parse(self.cache_file)
@@ -130,8 +131,21 @@ class RssFeed:
                                        subdir="%s.orig" % self.key,
                                        TTL=ttl)
             self.cache_file_downloaded = True
+            self.load_text()
         else:
             log.debug("cache is not stale:%s" % self.rss_url)
+            self.load_text()
+
+
+    def load_text(self):
+        if os.path.exists(self.cache_file):
+            self.text = open(self.cache_file, 'r').read()
+            if not self.text:
+                log.error("cache_file `%s` is empty" % self.cache_file)
+            else:
+                log.info("cache_file has text")
+        else:
+            log.error("cache_file `%s` is missing" % self.cache_file)
 
     def process_image(self):
         try:
@@ -296,10 +310,21 @@ class RssFeed:
             log.error("error.__doc__ %s" % e.__doc__)
             if hasattr(e, 'message'):
                 log.error("error.message %s" % e.message)
+            log.info("TEST RESULT: %s" % result)
             return result
+        except requests.exceptions.ChunkedEncodingError as e:
+            log.debug("BAD URL:%s" % url)
+            log.error("Error reading %s" % url)
+            log.error("error.__doc__ %s" % e.__doc__)
+            if hasattr(e, 'message'):
+                log.error("error.message %s" % e.message)
+            log.info("TEST RESULT: %s" % result)
+            return result
+
 
         if response.status_code not in (HTTP_OK, HTTP_PARTIAL):
             log.debug("BAD URL:%s" % url)
+            log.info("TEST RESULT: %s" % result)
             return result
 
         total_length = response.headers.get('content-length')
@@ -307,9 +332,59 @@ class RssFeed:
         done_float = 0
         if total_length is None: # no content length header
             # fp.write(response.content)
-            content = response.content
-            if not content:
+            log.info("total_length was None")
+            content = ""
+            try:
+                dl = 0
+                for data in response.iter_content(chunk_size=1024 * 1):
+                    dl += len(data)
+                    done_float = float(100 * dl / TEST_RANGE)
+                    if LOG_LEVEL <= log.INFO:
+                        sys.stdout.write("\rTEST %s %0.2f%% dl:%s" % (
+                            url,
+                            done_float,
+                            dl
+                        ) )
+                        sys.stdout.flush()
+                    if dl >= TEST_RANGE:
+                        if LOG_LEVEL <= log.INFO:
+                            sys.stdout.write("\n")
+                            sys.stdout.flush()
+                        result = True
+                        response.close()
+                        return result
+                # content = response.content
+                log.info("len(content):%s" % len(content))
+            except requests.exceptions.ConnectionError as e:
+                log.error("BAD URL:%s" % url)
+                log.error("Error reading %s" % url)
+                log.error("error.__doc__ %s" % e.__doc__)
+                if hasattr(e, 'message'):
+                    log.error("error.message %s" % e.message)
+                response.close()
+                return result
+            except requests.exceptions.ChunkedEncodingError as e:
+                log.error("BAD URL:%s" % url)
+                log.error("Error reading %s" % url)
+                log.error("error.__doc__ %s" % e.__doc__)
+                if hasattr(e, 'message'):
+                    log.error("error.message %s" % e.message)
+                response.close()
+                log.info("TEST RESULT: %s" % result)
+                return result
+            except requests.exceptions.ReadTimeout as e:
                 log.debug("BAD URL:%s" % url)
+                log.error("Error reading %s" % url)
+                log.error("error.__doc__ %s" % e.__doc__)
+                if hasattr(e, 'message'):
+                    log.error("error.message %s" % e.message)
+                log.info("TEST RESULT: %s" % result)
+                return result
+
+            if not content:
+                log.error("No content BAD URL:%s" % url)
+                log.info("TEST RESULT: %s" % result)
+                return result
             else:
                 result = True
         else:
@@ -336,8 +411,12 @@ class RssFeed:
                     if response.status_code not in (HTTP_OK, HTTP_PARTIAL):
                         log.error("BAD URL:%s STATUS:%s" % (url, response.status_code))
                         response.close()
+                        log.info("TEST RESULT: %s" % result)
                         return result
                     if dl >= TEST_RANGE:
+                        if LOG_LEVEL <= log.INFO:
+                            sys.stdout.write("\n")
+                            sys.stdout.flush()
                         result = True
                         if dl > total_length:
                             result = False
@@ -359,20 +438,23 @@ class RssFeed:
                 if hasattr(e, 'message'):
                     log.error("error.message %s" % e.message)
                 response.close()
+                log.info("TEST RESULT: %s" % result)
                 return result
-            except requests.exceptions.ConnectionError as e:
+            except requests.exceptions.ChunkedEncodingError as e:
                 log.error("BAD URL:%s" % url)
                 log.error("Error reading %s" % url)
                 log.error("error.__doc__ %s" % e.__doc__)
                 if hasattr(e, 'message'):
                     log.error("error.message %s" % e.message)
                 response.close()
+                log.info("TEST RESULT: %s" % result)
                 return result
 
         if LOG_LEVEL <= log.INFO:
             sys.stdout.write("\n")
             sys.stdout.flush()
 
+        log.info("TEST RESULT: %s" % result)
         return result
 
     def get_urls_to_process(self, urls, test_hash):
@@ -422,11 +504,14 @@ class RssFeed:
         return res.url
 
     def write_final_file(self):
-        with open(self.final_file,'w') as fp:
-            fp.write(self.text)
-            if LOG_LEVEL <= log.INFO:
-                print("== final file ==")
-                print(self.text)
+        if self.text:
+            with open(self.final_file,'w') as fp:
+                fp.write(self.text)
+                if LOG_LEVEL <= log.INFO:
+                    print("== final file ==")
+                    print(self.text)
+        else:
+            log.error("Final xml is empty")
 
         log.debug("error_tracker:%s" % pformat(error_tracker))
         log.debug("reliablity_tracker:%s" % pformat(reliablity_tracker))

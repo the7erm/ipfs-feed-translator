@@ -122,7 +122,7 @@ def download(url, refresh=True,
         tmp_cache_file = "%s.tmp" % cache_file
         response = requests.get(url, stream=True)
         if response.status_code not in (HTTP_OK, HTTP_PARTIAL):
-            msg = "http code not OK download failed"
+            msg = "http code not OK/HTTP_PARTIAL download failed:%s" % url
             if fail_callback:
                 result['errors'].append(msg)
                 fail_callback(result)
@@ -162,7 +162,7 @@ def download(url, refresh=True,
         if response.status_code not in (HTTP_OK, HTTP_PARTIAL):
             if os.path.exist(tmp_cache_file):
                 os.remove(tmp_cache_file)
-            msg = "http code not OK download failed"
+            msg = "http code not OK download failed:%s" % url
             if fail_callback:
                 result['errors'].append(msg)
                 fail_callback(result)

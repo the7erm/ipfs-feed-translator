@@ -16,6 +16,7 @@ while True:
     ipns_urls = []
     cache_file_downloaded = False
     for url in config.RSS_URLS:
+        # TODO catcall errors and log them.
         log.debug("Creating feed object for:%s" % url)
         feed = RssFeed(url)
         feed.process()
