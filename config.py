@@ -24,7 +24,7 @@ USER_CONFIG_FILE = os.path.join(USER_DIR, "config.yml")
 
 STORAGE_DIR = os.path.join(USER_DIR, "storage")
 
-LOG_LEVEL = "DEBUG"
+LOG_LEVEL = "INFO"
 
 FALLBACK_LOCAL_GATEWAYS = []
 FIRST_CHOICE_GATEWAYS = []
