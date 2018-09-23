@@ -1,6 +1,9 @@
 # Changelog
 
 ## [0.7] - 2018-09-23
+### Added
+- Display the default value if there is one and it's different than the config.
+
 ### Changed
 - Log levels are now processed differently.
 

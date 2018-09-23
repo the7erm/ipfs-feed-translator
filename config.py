@@ -152,12 +152,15 @@ if os.path.exists(USER_CONFIG_FILE):
                         if not hasattr(thismodule, name):
                             print("invalid config option")
                             continue
+                        default_value = getattr(thismodule, name)
                         if isinstance(value, (list, dict)):
-                            print("default: %s = %s" % (name, pformat(getattr(thismodule, name)) ))
+                            if default_value and value != default_value:
+                                print("default: %s = %s" % (name, pformat(default_value) ))
                             print("set:     %s = %s" % (name, pformat(value)))
                             setattr(thismodule, name, value)
                         else:
-                            print("default: %s = %s" % (name, getattr(thismodule, name) ))
+                            if default_value and value != default_value:
+                                print("default: %s = %s" % (name, pformat(default_value) ))
                             print("set:     %s = %s" % (name, value))
                             setattr(thismodule, name, value)
 
