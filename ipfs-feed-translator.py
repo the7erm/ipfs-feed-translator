@@ -34,5 +34,5 @@ while True:
         print("published to:%s" % ipns_url)
     if "--loop" not in sys.argv and "-l" not in sys.argv:
         break
-    log.debug("sleeping for a minute")
-    time.sleep(60)
+    log.debug("sleeping for a %s seconds" % config.LOOP_SLEEP_TIME)
+    time.sleep(config.LOOP_SLEEP_TIME)

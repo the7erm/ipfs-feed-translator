@@ -34,6 +34,8 @@ PUBLIC_GATEWAYS_URL = [
     "https://ipfs.github.io/public-gateway-checker/gateways.json"
 ]
 
+LOOP_SLEEP_TIME = 60
+
 SAMPLE_CONFIG = """
 # Sample config
 
@@ -76,6 +78,9 @@ MAX_ERRORS: 2
 
 # Can be CRITICAL, ERROR, WARNING, INFO, DEBUG
 LOG_LEVEL: "INFO"
+
+# How long should --loop sleep before it tries again.
+LOOP_SLEEP_TIME: 60
 
 """.format(STORAGE_DIR=STORAGE_DIR)
 
