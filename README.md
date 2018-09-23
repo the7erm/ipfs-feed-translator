@@ -75,6 +75,9 @@ MAX_ERRORS: 2
 # Can be CRITICAL, ERROR, WARNING, INFO, DEBUG
 LOG_LEVEL: "INFO"
 
+# How long should --loop sleep before it tries again.
+LOOP_SLEEP_TIME: 3600
+
 ```
 
 ### Execute the program
