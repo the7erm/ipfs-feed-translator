@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.7] - 2018-09-23
+### Changed
+- Log levels are now processed differently.
+
 ## [0.6] - 2018-09-23
 ### Added
 - Added new config opiton `LOOP_SLEEP_TIME` for -loop

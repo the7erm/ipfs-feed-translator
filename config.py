@@ -12,6 +12,7 @@ thismodule = sys.modules[__name__]
 
 TIME_TO_LIVE = 60 * 30 # 30 minutes
 TEST_DOWNLOAD_TIMEOUT = (60 * 3)
+LOOP_SLEEP_TIME = 60
 RSS_URLS = []
 
 PUBLIC_GATEWAYS_URL = [
@@ -23,18 +24,16 @@ USER_CONFIG_FILE = os.path.join(USER_DIR, "config.yml")
 
 STORAGE_DIR = os.path.join(USER_DIR, "storage")
 
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = "DEBUG"
 
 FALLBACK_LOCAL_GATEWAYS = []
 FIRST_CHOICE_GATEWAYS = []
 BLACK_LIST = []
 MAX_ERRORS = 2
-DEFAULT_LEVEL = logging.DEBUG
+DEFAULT_LEVEL = "INFO"
 PUBLIC_GATEWAYS_URL = [
     "https://ipfs.github.io/public-gateway-checker/gateways.json"
 ]
-
-LOOP_SLEEP_TIME = 60
 
 SAMPLE_CONFIG = """
 # Sample config
@@ -98,6 +97,14 @@ Usage: ipfs-feed-translator.py [OPTION]
   -h, --help, -help, -?      Display this and exit.
 """
 
+LOG_LEVELS = {
+    "CRITICAL": logging.CRITICAL,
+    "ERROR": logging.ERROR,
+    "WARNING": logging.WARNING,
+    "INFO": logging.INFO,
+    "DEBUG": logging.DEBUG,
+}
+
 if "--help" in sys.argv or "-help" in sys.argv or "-h" in sys.argv or\
    "-?" in sys.argv:
     print(HELP)
@@ -145,26 +152,14 @@ if os.path.exists(USER_CONFIG_FILE):
                         if not hasattr(thismodule, name):
                             print("invalid config option")
                             continue
-                        setattr(thismodule, name, value)
                         if isinstance(value, (list, dict)):
-                            print("set:%s = %s" % (name, pformat(value)))
+                            print("default: %s = %s" % (name, pformat(getattr(thismodule, name)) ))
+                            print("set:     %s = %s" % (name, pformat(value)))
+                            setattr(thismodule, name, value)
                         else:
-                            print("set:%s = %s" % (name, value))
-
-                            if name == "LOG_LEVEL":
-                                if value == "CRITICAL":
-                                    LOG_LEVEL = logging.CRITICAL
-                                elif value == "ERROR":
-                                    LOG_LEVEL = logging.ERROR
-                                elif value == "WARNING":
-                                    LOG_LEVEL = logging.WARNING
-                                elif value == "INFO":
-                                    LOG_LEVEL = logging.INFO
-                                elif value == "DEBUG":
-                                    LOG_LEVEL = logging.DEBUG
-                                else:
-                                    LOG_LEVEL = DEFAULT_LEVEL
-
+                            print("default: %s = %s" % (name, getattr(thismodule, name) ))
+                            print("set:     %s = %s" % (name, value))
+                            setattr(thismodule, name, value)
 
             except Exception as e:
                 print("Error Decoding:%s" % USER_CONFIG_FILE)
@@ -188,6 +183,12 @@ if "~" in STORAGE_DIR:
 if not os.path.exists(STORAGE_DIR):
     os.makedirs(STORAGE_DIR)
 
+_LOG_LEVEL = LOG_LEVELS.get(LOG_LEVEL)
+if _LOG_LEVEL is None:
+    logging.error("Invalid LOG_LEVEL:%s using DEFAULT:%s" % (LOG_LEVEL, DEFAULT_LEVEL))
+    LOG_LEVEL = LOG_LEVELS.get(DEFAULT_LEVEL)
+else:
+    LOG_LEVEL = _LOG_LEVEL
 
 if not RSS_URLS:
     print ("No urls to process")
