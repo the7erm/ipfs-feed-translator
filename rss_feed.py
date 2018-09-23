@@ -142,8 +142,7 @@ class RssFeed:
             self.text = open(self.cache_file, 'r').read()
             if not self.text:
                 log.error("cache_file `%s` is empty" % self.cache_file)
-            else:
-                log.info("cache_file has text")
+
         else:
             log.error("cache_file `%s` is missing" % self.cache_file)
 
