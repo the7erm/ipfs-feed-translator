@@ -101,7 +101,6 @@ def download(url, refresh=True,
 
     basename = os.path.basename(url)
 
-
     cache_file = construct_cache_file_name(url, subdir)
 
     result = {

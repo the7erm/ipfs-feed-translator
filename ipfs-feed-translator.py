@@ -7,6 +7,7 @@ import rss_feed
 
 from rss_feed import RssFeed, public_gateways
 from logger import log
+from downloader import download, safe_filename
 
 log.debug("import complete")
 
@@ -29,9 +30,18 @@ while True:
 
 
     for ipns_url, rss_url in ipns_urls:
+        if ':hash' in ipns_url:
+            continue
         print("*"*80)
         print("rss_url:%s" % rss_url)
         print("published to:%s" % ipns_url)
+        try:
+            cache_file = download(ipns_url, subdir="ipns_results/%s" % safe_filename(ipns_url))
+            if not cache_file:
+                log.error("Failed:%s" % ipns_url)
+        except:
+            log.error("Failed:%s" % ipns_url)
+
     if "--loop" not in sys.argv and "-l" not in sys.argv:
         break
     log.debug("sleeping for a %s seconds" % config.LOOP_SLEEP_TIME)

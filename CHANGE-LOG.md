@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8] - 2018-09-28
+### Added
+- Added test for ipns urls.
+
 ## [0.7] - 2018-09-23
 ### Added
 - Display the default value if there is one and it's different than the config.

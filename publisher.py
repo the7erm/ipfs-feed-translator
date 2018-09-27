@@ -9,6 +9,7 @@ from config import STORAGE_DIR, FIRST_CHOICE_GATEWAYS, PUBLIC_GATEWAYS_URL, \
                    BLACK_LIST
 from downloader import download
 from pprint import pformat
+from urllib.parse import urlparse
 
 def get_public_gateways():
     test_file = os.path.join(STORAGE_DIR, "test_gateway_file")
@@ -38,6 +39,15 @@ def get_public_gateways():
                 if _url in BLACK_LIST:
                     log.debug("BLACK_LISTED:%s" % _url)
                     continue
+                blacklisted = False
+                for host in BLACK_LIST:
+                    url_info = urlparse(_url)
+                    if url_info.netloc == host:
+                        blacklisted = True
+                        break;
+                if blacklisted:
+                    log.debug("BLACK_LISTED:%s" % _url)
+                    continue
                 if _url not in gateways:
                     try:
                         cache_file = download(_url.replace(":hash", pub_key))
@@ -59,6 +69,7 @@ def get_public_gateways():
     if not gateways:
         gateways = public_gateways_fallback
         log.error("gateways was empty using fallback")
+    log.debug(pformat(gateways))
     return gateways
 
 def publish(file):
