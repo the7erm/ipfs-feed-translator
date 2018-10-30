@@ -11,6 +11,32 @@ from downloader import download
 from pprint import pformat
 from urllib.parse import urlparse
 
+public_gateways_fallback = [
+    "https://ipfs.io/ipfs/:hash",
+    "https://gateway.ipfs.io/ipfs/:hash",
+    "https://ipfs.infura.io/ipfs/:hash",
+    "https://rx14.co.uk/ipfs/:hash",
+    "https://xmine128.tk/ipfs/:hash",
+    "https://upload.global/ipfs/:hash",
+    "https://ipfs.jes.xxx/ipfs/:hash",
+    "https://catalunya.network/ipfs/:hash",
+    "https://siderus.io/ipfs/:hash",
+    "https://www.eternum.io/ipfs/:hash",
+    "https://hardbin.com/ipfs/:hash",
+    "https://ipfs.macholibre.org/ipfs/:hash",
+    "https://ipfs.works/ipfs/:hash",
+    "https://ipfs.work/ipfs/:hash",
+    "https://ipfs.wa.hle.rs/ipfs/:hash",
+    "https://api.wisdom.sh/ipfs/:hash",
+    "https://gateway.blocksec.com/ipfs/:hash",
+    "https://ipfs.renehsz.com/ipfs/:hash",
+    "https://cloudflare-ipfs.com/ipfs/:hash",
+    "https://ipns.co/:hash",
+    "https://ipfs.netw0rk.io/ipfs/:hash",
+    "https://gateway.swedneck.xyz/ipfs/:hash",
+    "http://10.139.105.114:8080/ipfs/:hash"
+]
+
 def get_public_gateways():
     test_file = os.path.join(STORAGE_DIR, "test_gateway_file")
     test_string = "Hello from rss-processor.py"
@@ -28,7 +54,7 @@ def get_public_gateways():
             log.debug("contents:%s" % contents)
             try:
                 public_gateways = json.loads(contents)
-                log.debug("public_gateways:%s" % public_gateways)
+                log.debug("public_gateways:%s" % pformat(public_gateways))
             except Exception as e:
                 log.error("Error reading %s" % gateways_cache_file)
                 log.error("error.__doc__ %s" % e.__doc__)
@@ -69,7 +95,7 @@ def get_public_gateways():
     if not gateways:
         gateways = public_gateways_fallback
         log.error("gateways was empty using fallback")
-    log.debug(pformat(gateways))
+    log.info(pformat(gateways))
     return gateways
 
 def publish(file):

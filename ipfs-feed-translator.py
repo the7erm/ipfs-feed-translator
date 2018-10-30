@@ -42,7 +42,10 @@ while True:
         except:
             log.error("Failed:%s" % ipns_url)
 
-    if "--loop" not in sys.argv and "-l" not in sys.argv:
+    if "--loop" not in sys.argv and "-l" not in sys.argv and "-loop" not in sys.argv:
         break
     log.debug("sleeping for a %s seconds" % config.LOOP_SLEEP_TIME)
     time.sleep(config.LOOP_SLEEP_TIME)
+
+
+print("Done")

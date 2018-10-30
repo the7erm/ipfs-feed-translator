@@ -23,6 +23,7 @@ from config import MAX_ERRORS, TEST_DOWNLOAD_TIMEOUT, FIRST_CHOICE_GATEWAYS, \
                    LOG_LEVEL
 from constants import HTTP_OK, HTTP_PARTIAL
 
+
 public_gateways = get_public_gateways()
 log.debug("public_gateways:%s" % pformat(public_gateways))
 
@@ -291,7 +292,7 @@ class RssFeed:
 
     def test_download(self, url):
         result = False
-        log.info("TESTING: %s" % url)
+        log.info("TESTING: %s" % url.replace(" ", "%20"))
         if '/home/' in url:
             log.error("/home/ is in url")
             sys.exit()
@@ -333,6 +334,13 @@ class RssFeed:
             # fp.write(response.content)
             log.info("total_length was None")
             content = ""
+            rows, columns = subprocess.check_output(['stty', 'size']).decode().split()
+            try:
+                columns = int(columns)
+            except:
+                columns = 80
+            max_len = columns - (len("TEST 100.00%% dl:%s " % TEST_RANGE) + 4)
+            short_url = (url[:max_len] + '...') if len(url) > max_len else url
             try:
                 dl = 0
                 for data in response.iter_content(chunk_size=1024 * 1):
@@ -340,7 +348,7 @@ class RssFeed:
                     done_float = float(100 * dl / TEST_RANGE)
                     if LOG_LEVEL <= log.INFO:
                         sys.stdout.write("\rTEST %s %0.2f%% dl:%s" % (
-                            url,
+                            short_url,
                             done_float,
                             dl
                         ) )
@@ -506,7 +514,7 @@ class RssFeed:
         if self.text:
             with open(self.final_file,'w') as fp:
                 fp.write(self.text)
-                if LOG_LEVEL <= log.INFO:
+                if LOG_LEVEL < log.INFO:
                     print("== final file ==")
                     print(self.text)
         else:
